@@ -28,13 +28,11 @@
   background: #ffffff;
   color: #172033;
   display: grid;
-  gap: 0.25rem;
+  gap: 0.35rem;
   padding: 0.75rem 1rem;
   text-align: left;
 }
 
-.conversation-item:hover,
-.conversation-item:focus-visible,
 .conversation-item.active {
   background: #eef2ff;
   color: #172033;
@@ -44,6 +42,39 @@
 .history-empty {
   color: #526079;
   font-size: 0.85rem;
+}
+
+.conversation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.conversation-open-button,
+.conversation-rename-button,
+.conversation-edit-form button {
+  font-size: 0.85rem;
+  padding: 0.45rem 0.75rem;
+}
+
+.conversation-rename-button {
+  background: #eef2ff;
+  color: #243b8f;
+}
+
+.conversation-rename-button:hover,
+.conversation-rename-button:focus-visible {
+  background: #dfe6ff;
+}
+
+.conversation-edit-form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.conversation-edit-form input {
+  width: 100%;
 }
 
 .danger {
@@ -72,8 +103,6 @@
     color: #f8fafc;
   }
 
-  .conversation-item:hover,
-  .conversation-item:focus-visible,
   .conversation-item.active {
     background: #1e293b;
     color: #dbeafe;
@@ -82,5 +111,15 @@
   .conversation-item span,
   .history-empty {
     color: #b8c3d9;
+  }
+
+  .conversation-rename-button {
+    background: #1e293b;
+    color: #dbeafe;
+  }
+
+  .conversation-rename-button:hover,
+  .conversation-rename-button:focus-visible {
+    background: #334155;
   }
 }

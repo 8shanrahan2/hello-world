@@ -42,9 +42,39 @@
         <p class="eyebrow">Hello World Web App</p>
         <h1 id="app-heading">Hello, world!</h1>
         <p id="user-summary" class="subtitle">You are signed in.</p>
-        <button id="hello-button" type="button">Click me</button>
-        <button id="logout-button" class="secondary" type="button">Log out</button>
+
+        <div class="button-row">
+          <button id="hello-button" type="button">Click me</button>
+          <button id="logout-button" class="secondary" type="button">Log out</button>
+        </div>
         <p id="message" class="message" aria-live="polite"></p>
+
+        <section class="chat-panel" aria-labelledby="chat-heading">
+          <div class="chat-header">
+            <div>
+              <p class="eyebrow">OpenRouter</p>
+              <h2 id="chat-heading">Ask a free model</h2>
+            </div>
+            <label class="model-picker">
+              Model
+              <select id="model-select" name="model">
+                <option value="cohere/north-mini-code:free">Cohere North Mini Code</option>
+                <option value="nvidia/nemotron-3-ultra-550b-a55b:free">NVIDIA Nemotron 3 Ultra</option>
+              </select>
+            </label>
+          </div>
+
+          <div id="chat-log" class="chat-log" aria-live="polite"></div>
+
+          <form id="chat-form" class="chat-form">
+            <label>
+              Message
+              <textarea id="chat-input" name="message" rows="4" placeholder="Ask something..." required></textarea>
+            </label>
+            <button id="chat-submit" type="submit">Send</button>
+            <p id="chat-status" class="message" aria-live="polite"></p>
+          </form>
+        </section>
       </section>
     </main>
 

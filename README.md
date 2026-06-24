@@ -4,20 +4,36 @@ A minimal web application built with HTML, CSS, JavaScript, and Supabase Auth.
 
 ## Run Locally
 
-Open `index.html` in a browser.
+Set the required environment variables, then run the build script:
+
+```bash
+export SUPABASE_URL="https://kutisicwxqynceyeqltx.supabase.co"
+export SUPABASE_PUBLISHABLE_KEY="your-supabase-publishable-key"
+npm run build
+```
+
+Open `dist/index.html` in a browser.
 
 ## Supabase Auth setup
 
-This app uses Supabase Auth through `config.js`.
+This app generates `dist/config.js` at build time from environment variables.
 
-```js
-window.SUPABASE_CONFIG = {
-  url: 'https://kutisicwxqynceyeqltx.supabase.co',
-  publishableKey: 'sb_publishable_pwQ_P77r2OeIZJdQLgSZ3w_SPWTaMAO',
-};
+Required variables:
+
+```txt
+SUPABASE_URL=https://kutisicwxqynceyeqltx.supabase.co
+SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
 ```
 
-The publishable key is safe to expose in browser code. Do not expose a Supabase service-role key in frontend code.
+In Vercel, add both variables under:
+
+**Project Settings → Environment Variables**
+
+Add them for **Preview** and **Production** if you want both environments to work.
+
+The publishable key is safe to expose in browser code. The deployed site still serves it to the browser because Supabase client-side auth needs it. Keeping it in Vercel env vars prevents committing the value to GitHub, but it does not make the publishable key secret.
+
+Do not expose a Supabase service-role key in frontend code.
 
 If email confirmations are enabled in Supabase, newly created users must confirm their email before logging in.
 
@@ -28,7 +44,7 @@ If email confirmations are enabled in Supabase, newly created users must confirm
 - Persist session with Supabase Auth
 - Log out
 - Hello World page after authentication
-- No build tools required
+- Build-time config generation from Vercel environment variables
 
 ## Notes
 

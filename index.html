@@ -45,9 +45,25 @@
 
         <div class="button-row">
           <button id="hello-button" type="button">Click me</button>
+          <button id="new-conversation-button" class="secondary" type="button">New conversation</button>
+          <button id="delete-conversation-button" class="danger" type="button">Delete conversation</button>
           <button id="logout-button" class="secondary" type="button">Log out</button>
         </div>
         <p id="message" class="message" aria-live="polite"></p>
+
+        <section class="history-panel" aria-labelledby="history-heading">
+          <div class="history-header">
+            <div>
+              <p class="eyebrow">History</p>
+              <h2 id="history-heading">Your conversations</h2>
+            </div>
+            <label class="search-box">
+              Search
+              <input id="conversation-search" type="search" placeholder="Search across conversations..." />
+            </label>
+          </div>
+          <div id="conversation-list" class="conversation-list" aria-live="polite"></div>
+        </section>
 
         <section class="chat-panel" aria-labelledby="chat-heading">
           <div class="chat-header">

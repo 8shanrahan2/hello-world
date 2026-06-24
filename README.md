@@ -1,6 +1,6 @@
 # Hello World
 
-A minimal web application built with HTML, CSS, JavaScript, Supabase Auth, and an OpenRouter chat wrapper.
+A minimal web application built with HTML, CSS, JavaScript, Supabase Auth, Supabase conversation history, and an OpenRouter chat wrapper.
 
 ## Run Locally
 
@@ -21,7 +21,7 @@ For local API testing, run the app through Vercel instead of opening the file di
 vercel dev
 ```
 
-## Supabase Auth setup
+## Supabase setup
 
 This app generates `dist/config.js` at build time from environment variables.
 
@@ -44,6 +44,23 @@ Do not expose a Supabase service-role key in frontend code.
 
 If email confirmations are enabled in Supabase, newly created users must confirm their email before logging in.
 
+## Database setup
+
+Run the SQL migration in your Supabase project before using conversation history:
+
+```txt
+supabase/migrations/001_conversation_history.sql
+```
+
+The migration creates:
+
+- `conversations`
+- `messages`
+- indexes for user history and message search
+- Row Level Security policies tying rows to `auth.uid()`
+
+The app stores message history in Supabase Postgres and relies on RLS so users can only read, create, and delete their own conversations/messages.
+
 ## OpenRouter setup
 
 Add this Vercel environment variable for Preview and Production:
@@ -54,7 +71,7 @@ OPENROUTER_API_KEY=your-openrouter-api-key
 
 The OpenRouter key is a real secret. It is only used by the server-side `/api/chat` function and should never be exposed in browser JavaScript.
 
-The app currently hard-codes a small allowlist of free OpenRouter models in both the UI and `/api/chat`, so the browser cannot choose arbitrary paid models through your API key.
+The app hard-codes a small allowlist of free OpenRouter models in both the UI and `/api/chat`, so the browser cannot choose arbitrary paid models through your API key.
 
 ## Features
 
@@ -65,8 +82,12 @@ The app currently hard-codes a small allowlist of free OpenRouter models in both
 - Hello World page after authentication
 - Authenticated chat UI backed by OpenRouter
 - Server-side OpenRouter API wrapper
+- Create new conversations
+- Delete conversations
+- Save user and assistant messages to Supabase
+- Search across conversation titles and messages
 - Build-time config generation from Vercel environment variables
 
 ## Notes
 
-This is a client-only static demo with a small Vercel API route for model calls. It is good for learning auth, environment variables, and model-provider wrappers. For a production app with private data, add Supabase Row Level Security policies and move privileged logic server-side.
+This is a client-only static demo with a small Vercel API route for model calls. It is good for learning auth, environment variables, conversation persistence, and model-provider wrappers. Before using it with real users, add rate limits and review your Supabase RLS policies carefully.

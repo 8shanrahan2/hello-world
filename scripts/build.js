@@ -15,19 +15,21 @@ if (missingEnv.length > 0) {
 fs.rmSync(outputDir, { recursive: true, force: true });
 fs.mkdirSync(outputDir, { recursive: true });
 
-for (const fileName of ['index.html', 'styles.css', 'chat.css', 'script.js']) {
+for (const fileName of ['index.html', 'styles.css', 'chat.css', 'history.css', 'script.js', 'history.js']) {
   fs.copyFileSync(path.join(rootDir, fileName), path.join(outputDir, fileName));
 }
 
 const indexPath = path.join(outputDir, 'index.html');
-const indexHtml = fs.readFileSync(indexPath, 'utf8');
-fs.writeFileSync(
-  indexPath,
-  indexHtml.replace(
-    '<link rel="stylesheet" href="styles.css" />',
-    '<link rel="stylesheet" href="styles.css" />\n    <link rel="stylesheet" href="chat.css" />'
-  )
+let indexHtml = fs.readFileSync(indexPath, 'utf8');
+indexHtml = indexHtml.replace(
+  '<link rel="stylesheet" href="styles.css" />',
+  '<link rel="stylesheet" href="styles.css" />\n    <link rel="stylesheet" href="chat.css" />\n    <link rel="stylesheet" href="history.css" />'
 );
+indexHtml = indexHtml.replace(
+  '<script src="script.js"></script>',
+  '<script src="script.js"></script>\n    <script src="history.js"></script>'
+);
+fs.writeFileSync(indexPath, indexHtml);
 
 const config = `window.SUPABASE_CONFIG = {\n  url: '${process.env.SUPABASE_URL}',\n  publishableKey: '${process.env.SUPABASE_PUBLISHABLE_KEY}',\n};\n`;
 

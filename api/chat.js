@@ -1,4 +1,7 @@
+const DEFAULT_MODEL = 'openrouter/free';
+
 const ALLOWED_MODELS = new Set([
+  DEFAULT_MODEL,
   'cohere/north-mini-code:free',
   'nvidia/nemotron-3-ultra-550b-a55b:free',
 ]);
@@ -13,7 +16,7 @@ module.exports = async function handler(req, res) {
   }
 
   const { message, model } = req.body || {};
-  const selectedModel = ALLOWED_MODELS.has(model) ? model : 'cohere/north-mini-code:free';
+  const selectedModel = ALLOWED_MODELS.has(model) ? model : DEFAULT_MODEL;
 
   if (!message || typeof message !== 'string') {
     return res.status(400).json({ error: 'Message is required.' });

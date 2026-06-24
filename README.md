@@ -8,27 +8,18 @@ Open `index.html` in a browser.
 
 ## Supabase Auth setup
 
-This app expects a Supabase project URL and publishable key in `config.js`.
-
-1. Open your Supabase project.
-2. Go to **Project Settings → API**.
-3. Copy your project URL and publishable key.
-4. Update `config.js`:
+This app uses Supabase Auth through `config.js`.
 
 ```js
 window.SUPABASE_CONFIG = {
-  url: 'https://your-project-ref.supabase.co',
-  publishableKey: 'your-supabase-publishable-key',
+  url: 'https://kutisicwxqynceyeqltx.supabase.co',
+  publishableKey: 'sb_publishable_pwQ_P77r2OeIZJdQLgSZ3w_SPWTaMAO',
 };
 ```
 
-For this project, the Supabase URL is already set to:
+The publishable key is safe to expose in browser code. Do not expose a Supabase service-role key in frontend code.
 
-```txt
-https://krbandlgishkmnxylkhq.supabase.co
-```
-
-You still need to paste in the publishable key.
+If email confirmations are enabled in Supabase, newly created users must confirm their email before logging in.
 
 ## Features
 

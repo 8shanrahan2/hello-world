@@ -9,6 +9,12 @@ const helloButton = document.getElementById('hello-button');
 const logoutButton = document.getElementById('logout-button');
 const message = document.getElementById('message');
 const userSummary = document.getElementById('user-summary');
+const chatForm = document.getElementById('chat-form');
+const chatInput = document.getElementById('chat-input');
+const chatSubmit = document.getElementById('chat-submit');
+const chatStatus = document.getElementById('chat-status');
+const chatLog = document.getElementById('chat-log');
+const modelSelect = document.getElementById('model-select');
 
 let authMode = 'login';
 let supabaseClient = null;
@@ -68,6 +74,26 @@ function showAuth() {
 function setAuthMessage(text, type = 'info') {
   authMessage.textContent = text;
   authMessage.dataset.type = type;
+}
+
+function setChatStatus(text, type = 'info') {
+  chatStatus.textContent = text;
+  chatStatus.dataset.type = type;
+}
+
+function appendChatMessage(role, text) {
+  const item = document.createElement('article');
+  item.className = `chat-message ${role}`;
+
+  const label = document.createElement('strong');
+  label.textContent = role === 'user' ? 'You' : 'Model';
+
+  const body = document.createElement('p');
+  body.textContent = text;
+
+  item.append(label, body);
+  chatLog.append(item);
+  chatLog.scrollTop = chatLog.scrollHeight;
 }
 
 async function refreshSession() {
@@ -148,6 +174,44 @@ authForm.addEventListener('submit', async (event) => {
 
 helloButton.addEventListener('click', () => {
   message.textContent = 'Hello from JavaScript!';
+});
+
+chatForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const prompt = chatInput.value.trim();
+  const model = modelSelect.value;
+
+  if (!prompt) {
+    return;
+  }
+
+  appendChatMessage('user', prompt);
+  chatInput.value = '';
+  chatSubmit.disabled = true;
+  setChatStatus('Thinking…');
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: prompt, model }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error ?? 'The model request failed.');
+    }
+
+    appendChatMessage('assistant', data.text || '(No response text returned.)');
+    setChatStatus('');
+  } catch (error) {
+    setChatStatus(error.message, 'error');
+  } finally {
+    chatSubmit.disabled = false;
+    chatInput.focus();
+  }
 });
 
 logoutButton.addEventListener('click', async () => {

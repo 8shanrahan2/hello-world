@@ -25,6 +25,7 @@
   let currentConversationId = null;
   let conversations = [];
   let searchTimeout = null;
+  let editingConversationId = null;
 
   function getClient() {
     const { url, publishableKey } = window.SUPABASE_CONFIG || {};
@@ -62,6 +63,104 @@
     }
   }
 
+  async function renameConversation(conversationId, title) {
+    const client = getClient();
+    const cleanTitle = title.trim().slice(0, 80);
+
+    if (!client || !conversationId || !cleanTitle) {
+      return;
+    }
+
+    const { error } = await client
+      .from('conversations')
+      .update({ title: cleanTitle, updated_at: new Date().toISOString() })
+      .eq('id', conversationId);
+
+    if (error) {
+      throw error;
+    }
+
+    editingConversationId = null;
+    await loadConversations({ keepCurrent: true, skipLoadMessages: true });
+    setStatus('Conversation renamed.', 'success');
+  }
+
+  function renderConversationReadMode(conversation, item) {
+    const title = document.createElement('strong');
+    title.textContent = conversation.title;
+
+    const time = document.createElement('span');
+    time.textContent = new Date(conversation.updated_at).toLocaleString();
+
+    const actions = document.createElement('div');
+    actions.className = 'conversation-actions';
+
+    const openButton = document.createElement('button');
+    openButton.type = 'button';
+    openButton.className = 'conversation-open-button';
+    openButton.textContent = 'Open';
+    openButton.addEventListener('click', () => loadConversation(conversation.id));
+
+    const renameButton = document.createElement('button');
+    renameButton.type = 'button';
+    renameButton.className = 'conversation-rename-button';
+    renameButton.textContent = 'Rename';
+    renameButton.addEventListener('click', () => {
+      editingConversationId = conversation.id;
+      renderConversations();
+    });
+
+    actions.append(openButton, renameButton);
+    item.append(title, time, actions);
+  }
+
+  function renderConversationEditMode(conversation, item) {
+    const form = document.createElement('form');
+    form.className = 'conversation-edit-form';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = conversation.title;
+    input.maxLength = 80;
+    input.required = true;
+    input.setAttribute('aria-label', 'Conversation title');
+
+    const actions = document.createElement('div');
+    actions.className = 'conversation-actions';
+
+    const saveButton = document.createElement('button');
+    saveButton.type = 'submit';
+    saveButton.textContent = 'Save';
+
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.className = 'conversation-rename-button';
+    cancelButton.textContent = 'Cancel';
+    cancelButton.addEventListener('click', () => {
+      editingConversationId = null;
+      renderConversations();
+    });
+
+    actions.append(saveButton, cancelButton);
+    form.append(input, actions);
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      saveButton.disabled = true;
+
+      try {
+        await renameConversation(conversation.id, input.value);
+      } catch (error) {
+        setStatus(error.message, 'error');
+      } finally {
+        saveButton.disabled = false;
+      }
+    });
+
+    item.append(form);
+    window.setTimeout(() => input.focus(), 0);
+  }
+
   function renderConversations() {
     conversationList.innerHTML = '';
 
@@ -76,20 +175,17 @@
     }
 
     for (const conversation of conversations) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'conversation-item';
-      button.classList.toggle('active', conversation.id === currentConversationId);
+      const item = document.createElement('article');
+      item.className = 'conversation-item';
+      item.classList.toggle('active', conversation.id === currentConversationId);
 
-      const title = document.createElement('strong');
-      title.textContent = conversation.title;
+      if (conversation.id === editingConversationId) {
+        renderConversationEditMode(conversation, item);
+      } else {
+        renderConversationReadMode(conversation, item);
+      }
 
-      const time = document.createElement('span');
-      time.textContent = new Date(conversation.updated_at).toLocaleString();
-
-      button.append(title, time);
-      button.addEventListener('click', () => loadConversation(conversation.id));
-      conversationList.append(button);
+      conversationList.append(item);
     }
   }
 
@@ -314,6 +410,7 @@
       currentUser = session?.user || null;
       currentConversationId = null;
       conversations = [];
+      editingConversationId = null;
       chatLog.innerHTML = '';
       conversationList.innerHTML = '';
 

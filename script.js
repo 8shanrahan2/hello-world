@@ -1,71 +1,176 @@
-const DEMO_USER = {
-  email: 'demo@example.com',
-  password: 'password123',
-};
-
-const AUTH_STORAGE_KEY = 'hello-world-authenticated';
-
-const loginView = document.getElementById('login-view');
+const authView = document.getElementById('auth-view');
 const appView = document.getElementById('app-view');
-const loginForm = document.getElementById('login-form');
-const loginMessage = document.getElementById('login-message');
+const authForm = document.getElementById('auth-form');
+const authMessage = document.getElementById('auth-message');
+const authSubmit = document.getElementById('auth-submit');
+const loginTab = document.getElementById('login-tab');
+const signupTab = document.getElementById('signup-tab');
 const helloButton = document.getElementById('hello-button');
 const logoutButton = document.getElementById('logout-button');
 const message = document.getElementById('message');
+const userSummary = document.getElementById('user-summary');
 
-function showApp() {
-  loginView.classList.add('hidden');
-  appView.classList.remove('hidden');
-  loginMessage.textContent = '';
+let authMode = 'login';
+let supabaseClient = null;
+
+function getSupabaseConfig() {
+  return window.SUPABASE_CONFIG ?? {};
 }
 
-function showLogin() {
+function hasValidSupabaseConfig() {
+  const { url, publishableKey } = getSupabaseConfig();
+  return Boolean(
+    url &&
+      publishableKey &&
+      publishableKey !== 'PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE'
+  );
+}
+
+function getSupabaseClient() {
+  if (supabaseClient) {
+    return supabaseClient;
+  }
+
+  if (!hasValidSupabaseConfig()) {
+    return null;
+  }
+
+  const { url, publishableKey } = getSupabaseConfig();
+  supabaseClient = window.supabase.createClient(url, publishableKey);
+  return supabaseClient;
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  const isLogin = mode === 'login';
+
+  loginTab.classList.toggle('active', isLogin);
+  signupTab.classList.toggle('active', !isLogin);
+  loginTab.setAttribute('aria-selected', String(isLogin));
+  signupTab.setAttribute('aria-selected', String(!isLogin));
+  authSubmit.textContent = isLogin ? 'Log in' : 'Create account';
+  authMessage.textContent = '';
+}
+
+function showApp(user) {
+  authView.classList.add('hidden');
+  appView.classList.remove('hidden');
+  authMessage.textContent = '';
+  userSummary.textContent = `You are signed in as ${user.email}.`;
+}
+
+function showAuth() {
   appView.classList.add('hidden');
-  loginView.classList.remove('hidden');
+  authView.classList.remove('hidden');
   message.textContent = '';
 }
 
-function isAuthenticated() {
-  return localStorage.getItem(AUTH_STORAGE_KEY) === 'true';
+function setAuthMessage(text, type = 'info') {
+  authMessage.textContent = text;
+  authMessage.dataset.type = type;
 }
 
-function setAuthenticated(value) {
-  if (value) {
-    localStorage.setItem(AUTH_STORAGE_KEY, 'true');
-    showApp();
+async function refreshSession() {
+  const client = getSupabaseClient();
+
+  if (!client) {
+    showAuth();
+    setAuthMessage('Add your Supabase publishable key in config.js to enable real auth.', 'error');
     return;
   }
 
-  localStorage.removeItem(AUTH_STORAGE_KEY);
-  showLogin();
+  const {
+    data: { session },
+    error,
+  } = await client.auth.getSession();
+
+  if (error) {
+    showAuth();
+    setAuthMessage(error.message, 'error');
+    return;
+  }
+
+  if (session?.user) {
+    showApp(session.user);
+    return;
+  }
+
+  showAuth();
 }
 
-loginForm.addEventListener('submit', (event) => {
+loginTab.addEventListener('click', () => setAuthMode('login'));
+signupTab.addEventListener('click', () => setAuthMode('signup'));
+
+authForm.addEventListener('submit', async (event) => {
   event.preventDefault();
 
-  const formData = new FormData(loginForm);
+  const client = getSupabaseClient();
+
+  if (!client) {
+    setAuthMessage('Add your Supabase publishable key in config.js to enable real auth.', 'error');
+    return;
+  }
+
+  const formData = new FormData(authForm);
   const email = String(formData.get('email')).trim().toLowerCase();
   const password = String(formData.get('password'));
 
-  if (email === DEMO_USER.email && password === DEMO_USER.password) {
-    loginForm.reset();
-    setAuthenticated(true);
+  authSubmit.disabled = true;
+  setAuthMessage(authMode === 'login' ? 'Logging in…' : 'Creating account…');
+
+  const { data, error } =
+    authMode === 'login'
+      ? await client.auth.signInWithPassword({ email, password })
+      : await client.auth.signUp({ email, password });
+
+  authSubmit.disabled = false;
+
+  if (error) {
+    setAuthMessage(error.message, 'error');
     return;
   }
 
-  loginMessage.textContent = 'Invalid email or password. Try the demo login above.';
+  authForm.reset();
+
+  if (data.session?.user) {
+    showApp(data.session.user);
+    return;
+  }
+
+  if (authMode === 'signup') {
+    setAuthMessage('Account created. Check your email to confirm your account, then log in.', 'success');
+    setAuthMode('login');
+    return;
+  }
+
+  await refreshSession();
 });
 
 helloButton.addEventListener('click', () => {
   message.textContent = 'Hello from JavaScript!';
 });
 
-logoutButton.addEventListener('click', () => {
-  setAuthenticated(false);
+logoutButton.addEventListener('click', async () => {
+  const client = getSupabaseClient();
+
+  if (client) {
+    await client.auth.signOut();
+  }
+
+  showAuth();
 });
 
-if (isAuthenticated()) {
-  showApp();
-} else {
-  showLogin();
+const client = getSupabaseClient();
+
+if (client) {
+  client.auth.onAuthStateChange((_event, session) => {
+    if (session?.user) {
+      showApp(session.user);
+    } else {
+      showAuth();
+    }
+  });
 }
+
+setAuthMode('login');
+refreshSession();

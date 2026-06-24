@@ -8,12 +8,17 @@
   </head>
   <body>
     <main class="app">
-      <section id="login-view" class="card" aria-labelledby="login-heading">
+      <section id="auth-view" class="card" aria-labelledby="auth-heading">
         <p class="eyebrow">Hello World Web App</p>
-        <h1 id="login-heading">Sign in</h1>
-        <p class="subtitle">Use the demo account to access the app.</p>
+        <h1 id="auth-heading">Create account or sign in</h1>
+        <p class="subtitle">Use Supabase Auth to create a user account, log in, and persist your session.</p>
 
-        <form id="login-form" class="login-form">
+        <div class="tabs" role="tablist" aria-label="Auth mode">
+          <button id="login-tab" class="tab active" type="button" aria-selected="true">Log in</button>
+          <button id="signup-tab" class="tab" type="button" aria-selected="false">Create account</button>
+        </div>
+
+        <form id="auth-form" class="auth-form">
           <label>
             Email
             <input id="email" name="email" type="email" autocomplete="email" required />
@@ -21,26 +26,30 @@
 
           <label>
             Password
-            <input id="password" name="password" type="password" autocomplete="current-password" required />
+            <input id="password" name="password" type="password" autocomplete="current-password" minlength="6" required />
           </label>
 
-          <button type="submit">Log in</button>
-          <p id="login-message" class="message" aria-live="polite"></p>
+          <button id="auth-submit" type="submit">Log in</button>
+          <p id="auth-message" class="message" aria-live="polite"></p>
         </form>
 
-        <p class="hint">Demo login: <strong>demo@example.com</strong> / <strong>password123</strong></p>
+        <p class="hint">
+          Before this works, add your Supabase publishable key in <code>config.js</code>.
+        </p>
       </section>
 
       <section id="app-view" class="card hidden" aria-labelledby="app-heading">
         <p class="eyebrow">Hello World Web App</p>
         <h1 id="app-heading">Hello, world!</h1>
-        <p class="subtitle">You are signed in to this tiny static web app.</p>
+        <p id="user-summary" class="subtitle">You are signed in.</p>
         <button id="hello-button" type="button">Click me</button>
         <button id="logout-button" class="secondary" type="button">Log out</button>
         <p id="message" class="message" aria-live="polite"></p>
       </section>
     </main>
 
+    <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
   </body>
 </html>

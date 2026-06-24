@@ -51,12 +51,37 @@ h1 {
   color: #526079;
 }
 
-.login-form {
+.auth-form {
   display: grid;
   gap: 1rem;
-  margin: 0 auto;
+  margin: 1rem auto 0;
   max-width: 24rem;
   text-align: left;
+}
+
+.tabs {
+  display: inline-flex;
+  gap: 0.35rem;
+  border: 1px solid #c6cede;
+  border-radius: 999px;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem;
+}
+
+.tab {
+  background: transparent;
+  color: #243b8f;
+  padding: 0.55rem 0.9rem;
+}
+
+.tab:hover,
+.tab:focus-visible {
+  background: #eef2ff;
+}
+
+.tab.active {
+  background: #243b8f;
+  color: #ffffff;
 }
 
 label {
@@ -89,6 +114,11 @@ button:focus-visible {
   background: #1a2f77;
 }
 
+button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 .secondary {
   margin-left: 0.5rem;
   background: #eef2ff;
@@ -104,12 +134,29 @@ button:focus-visible {
   margin-top: 1rem;
   min-height: 1.5rem;
   font-weight: 700;
+  text-align: center;
+}
+
+.message[data-type='error'] {
+  color: #b42318;
+}
+
+.message[data-type='success'] {
+  color: #027a48;
 }
 
 .hint {
   margin: 1.25rem 0 0;
   color: #526079;
   font-size: 0.9rem;
+}
+
+code {
+  border-radius: 0.35rem;
+  background: #eef2ff;
+  color: #243b8f;
+  font-size: 0.9em;
+  padding: 0.1rem 0.3rem;
 }
 
 .hidden {
@@ -133,6 +180,24 @@ button:focus-visible {
     color: #b8c3d9;
   }
 
+  .tabs {
+    border-color: #425071;
+  }
+
+  .tab {
+    color: #dbeafe;
+  }
+
+  .tab:hover,
+  .tab:focus-visible {
+    background: #1e293b;
+  }
+
+  .tab.active {
+    background: #dbeafe;
+    color: #172033;
+  }
+
   input {
     border-color: #425071;
     background: #111827;
@@ -147,5 +212,10 @@ button:focus-visible {
   .secondary:hover,
   .secondary:focus-visible {
     background: #334155;
+  }
+
+  code {
+    background: #1e293b;
+    color: #dbeafe;
   }
 }
